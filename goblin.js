@@ -17,41 +17,44 @@ function(c, a)
 	var now_day = stamp.split(".")[0];
 	var now_time = stamp.split(".")[1];
 	var temp_day, temp_time, diff_time;
-	var m = #s.sys.access_log({});
+	var m = #s.sys.access_log({count:200});
 
+	//return m;
 	// every access log starting with the most recent
 	var s_l = m.length;
-	if(s_l > 250) { s_l = 250; }
+	//if(s_l > 200) { s_l = 200; }
 	for(i = s_l - 1; i > -1; i--)
 	{
 		// breach record
-		if(m[i].indexOf("Breach") > -1)
+		if(m[i].msg.indexOf("Breach") > -1)
 		{
-			stamp = m[i].split(" ")[0];
+			stamp = l.to_game_timestr(m[i].t);
 			temp_day = stamp.split(".")[0];
 			temp_time = stamp.split(".")[1];
-
+			
 			diff_time = ((now_day - temp_day) * 2400) + (now_time - temp_time);
-
-			if(diff_time < 15)
+			
+			if(diff_time < 4)
 			{
-				x = m[i].split(" ")[4];
+				x = m[i].u;
 				if(n.indexOf(x) == -1)
 				{
 					// attacker not on list, so add
 					n.push(x);
+					
+					// we could also record loc
 				}
 			}
 		}
 	}
-
+	
 	if(n.length > 0)
 	{
-		for(i=0;i<n.length*11;i++)
+		for(i=0;i<5;i++)
 		{
 			for(j=0;j<n.length; j++)
 			{
-				#s.accts.xfer_gc_to({ to:n[j].split(".")[0], amount:l.rand_int(1, 10), memo:(l.rand_int(0, 2) ? "Thank you for visiting!" : undefined)})
+				#s.accts.xfer_gc_to({ to:n[j].split(".")[0], amount:l.rand_int(1, 10), memo:(l.rand_int(0, 2) ? l.create_rand_string(8) : undefined)})
 			}
 		}
 	}
